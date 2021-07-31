@@ -124,7 +124,40 @@ function create_auth_files(){
 	sudo cp ${HOST_NAME}.key ${HOST_NAME}.crt  $KUBERNETES_PKI_FOLDER/kubelet
 	sudo cp kubeconfig ${HOST_NAME}-config.yaml $KUBELET_CONFIG_FOLDER
 
-	say "Files copied to corresponding folders"
+	say "auth files copied to corresponding folders"
+
+	popd
+}
+
+function create_service_unit(){
+
+	pushd $STAGING_FOLDER
+
+	cat > kubelet.service <<-EOF
+	[Unit]
+	Description=Kubernetes Kubelet
+	Documentation=https://github.com/kubernetes/kubernetes
+	After=docker.service                                                                                                                                                                                               Requires=docker.service                                                                                                                                                                                            
+	[Service]
+	ExecStart=kubelet \
+	--config=$KUBELET_CONFIG_FOLDER/${HOST_NAME}-config.yaml\
+	--kubeconfig=$KUBELET_CONFIG_FOLDER/kubeconfig  \
+	--image-pull-progress-deadline=2m  \
+	--tls-cert-file=$KUBERNETES_PKI_FOLDER/kubelet/${HOST_NAME}.crt  \
+	--tls-private-key-file=$KUBERNETES_PKI_FOLDER/kubelet/${HOST_NAME}.key \
+	--network-plugin=cni \
+	--register-node=true \
+	--v=2                                                                                                                                                                                                              Restart=on-failure
+	RestartSec=5
+
+	[Install]
+	WantedBy=multi-user.target
+	EOF
+
+	sudo cp kubelet.service /etc/systemd/system
+	sudo systemctl daemon-reload
+	sudo systemctl enable kubelet
+	sudo systemctl start kubelet
 
 	popd
 }
@@ -163,6 +196,10 @@ mkdir $STAGING_FOLDER -p
 say "Creating auth files."
 
 create_auth_files
+
+say "Creating kuebelet service"
+
+create_service_unit
 
 say "Deleting the staging folder $STAGING_FOLDER"
 
