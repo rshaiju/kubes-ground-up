@@ -2,9 +2,9 @@
 HOST_IP=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 HOST_NAME=$(hostname)
 K8S_VERSION="v1.21.3"
-STAGING_FOLDER="/tmp/kube-proxy-install"
+STAGING_FOLDER="/tmp/kube-scheduler-install"
 KUBERNETES_PKI_FOLDER="/etc/kubernetes/pki"
-KUBE_PROXY_CONFIG_FOLDER="/var/lib/kube-proxy"
+KUBE_SCHEDULER_CONFIG_FOLDER="/var/lib/kube-scheduler"
 
 exec 3>&1
 
@@ -52,10 +52,10 @@ function download_k8s_binaries()
 {
 	say "Downloading k8s binaries"
 	wget -q --show-progress --https-only --timestamping \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kube-proxy" \
+		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kube-scheduler" \
 		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl"
-	chmod +x kubectl kube-proxy
-	sudo mv kubectl kube-proxy /usr/local/bin
+	chmod +x kubectl kube-scheduler
+	sudo mv kubectl kube-scheduler /usr/local/bin
 	say "k8s binaries copied to bin folder"
 }
 
@@ -64,38 +64,25 @@ function create_auth_files(){
 
 	say "Creating certificates"
 
-	openssl genrsa -out kube-proxy.key 2048
-	openssl req -new -key kube-proxy.key -subj="/CN=system:kube-proxy" -out kube-proxy.csr
-	openssl x509 -req -in kube-proxy.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out kube-proxy.crt -days 1000 
-	openssl x509 -in kube-proxy.crt -noout -text
+	openssl genrsa -out kube-scheduler.key 2048
+	openssl req -new -key kube-scheduler.key -subj="/CN=system:kube-scheduler" -out kube-scheduler.csr
+	openssl x509 -req -in kube-scheduler.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out kube-scheduler.crt -days 1000 
+	openssl x509 -in kube-scheduler.crt -noout -text
 
 	say "Certificate created.. now creating kubeconfig"
 
 	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://10.0.0.4:6443 --kubeconfig kubeconfig
-	kubectl config set-credentials kube-proxy --embed-certs=true --client-certificate kube-proxy.crt --client-key kube-proxy.key --kubeconfig kubeconfig
-	kubectl config set-context shaijus-cluster-kube-proxy --user=kube-proxy --cluster=shaijus-cluster --kubeconfig kubeconfig
-	kubectl config use-context shaijus-cluster-kube-proxy --kubeconfig kubeconfig
+	kubectl config set-credentials kube-scheduler --embed-certs=true --client-certificate kube-scheduler.crt --client-key kube-scheduler.key --kubeconfig kubeconfig
+	kubectl config set-context shaijus-cluster-kube-scheduler --user=kube-scheduler --cluster=shaijus-cluster --kubeconfig kubeconfig
+	kubectl config use-context shaijus-cluster-kube-scheduler --kubeconfig kubeconfig
 	
-	say "kubeconfig created.. now creating kube-proxy config"
+	say "kubeconfig created.. now creating kube-scheduler config"
 
-	sudo cat > config.yaml <<-EOF
-	apiVersion: kubeproxy.config.k8s.io/v1alpha1
-	kind: KubeProxyConfiguration
-	clientConnection:
-	  kubeconfig: $KUBE_PROXY_CONFIG_FOLDER/kubeconfig 
-	clusterCIDR: "10.96.0.0/12"
-	mode: ""
-	EOF
+	sudo mkdir $KUBERNETES_PKI_FOLDER/kube-scheduler -p
+	sudo mkdir $KUBE_SCHEDULER_CONFIG_FOLDER -p
 
-	say "kube-proxy config created..now copying the prepared files"
-
-	sudo mkdir $KUBERNETES_PKI_FOLDER/kube-proxy -p
-	sudo mkdir $KUBE_PROXY_CONFIG_FOLDER -p
-
-
-	sudo cp $ca_crt  $ca_key $KUBERNETES_PKI_FOLDER
-	sudo cp kube-proxy.key kube-proxy.crt  $KUBERNETES_PKI_FOLDER/kube-proxy
-	sudo cp kubeconfig config.yaml $KUBE_PROXY_CONFIG_FOLDER
+	sudo cp kube-scheduler.key kube-scheduler.crt  $KUBERNETES_PKI_FOLDER/kube-scheduler
+	sudo cp kubeconfig $KUBE_SCHEDULER_CONFIG_FOLDER
 
 	say "Auth files copied to corresponding folders"
 
@@ -106,13 +93,18 @@ function create_service_unit(){
 
 	pushd $STAGING_FOLDER
 
-	cat > kube-proxy.service <<-EOF
+	cat > kube-scheduler.service <<-EOF
 	[Unit]
-	Description=Kubernetes Kube Proxy
+	Description=Kubernetes Scheduler
 	Documentation=https://github.com/kubernetes/kubernetes
 
 	[Service]
-	ExecStart=kube-proxy --config=${KUBE_PROXY_CONFIG_FOLDER}/config.yaml
+	ExecStart=kube-scheduler \
+	--authentication-kubeconfig=$KUBE_SCHEDULER_CONFIG_FOLDER/kubeconfig \
+	--authorization-kubeconfig=$KUBE_SCHEDULER_CONFIG_FOLDER/kubeconfig \
+	--bind-address=127.0.0.1 \
+	--kubeconfig=$KUBE_SCHEDULER_CONFIG_FOLDER/kubeconfig \
+	--leader-elect=true
 	Restart=on-failure
 	RestartSec=5
 
@@ -120,10 +112,10 @@ function create_service_unit(){
 	WantedBy=multi-user.target
 	EOF
 
-	sudo cp kube-proxy.service /etc/systemd/system
+	sudo cp kube-scheduler.service /etc/systemd/system
 	sudo systemctl daemon-reload
-	sudo systemctl enable kube-proxy
-	sudo systemctl start kube-proxy
+	sudo systemctl enable kube-scheduler
+	sudo systemctl start kube-scheduler
 
 	popd
 }
@@ -141,7 +133,7 @@ case "$1" in
 			shift 1;
 			;;
 		--help)
-			say "Installs Kubernetes Kube-Proxy"
+			say "Installs Kubernetes Kube-Scheduler"
 			say "Usage:"
 			say "\t $scipt_name --ca-key <PATH TO CA KEY FILE> --ca-crt <PATH TO CA CRT FILE>"
 			exit 0
@@ -164,7 +156,7 @@ say "Creating auth files."
 
 create_auth_files
 
-say "Creating kube-proxy service"
+say "Creating kuebe-scheduler service"
 
 create_service_unit
 
