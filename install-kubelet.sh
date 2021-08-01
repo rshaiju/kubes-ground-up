@@ -137,17 +137,18 @@ function create_service_unit(){
 	[Unit]
 	Description=Kubernetes Kubelet
 	Documentation=https://github.com/kubernetes/kubernetes
-	After=docker.service                                                                                                                                                                                               Requires=docker.service                                                                                                                                                                                            
+	After=docker.service                                                                                                                                                                                               
 	[Service]
 	ExecStart=kubelet \
-	--config=$KUBELET_CONFIG_FOLDER/${HOST_NAME}-config.yaml\
+	--config=$KUBELET_CONFIG_FOLDER/${HOST_NAME}-config.yaml \
 	--kubeconfig=$KUBELET_CONFIG_FOLDER/kubeconfig  \
 	--image-pull-progress-deadline=2m  \
 	--tls-cert-file=$KUBERNETES_PKI_FOLDER/kubelet/${HOST_NAME}.crt  \
 	--tls-private-key-file=$KUBERNETES_PKI_FOLDER/kubelet/${HOST_NAME}.key \
 	--network-plugin=cni \
 	--register-node=true \
-	--v=2                                                                                                                                                                                                              Restart=on-failure
+	--v=2
+        Restart=on-failure
 	RestartSec=5
 
 	[Install]
