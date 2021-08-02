@@ -6,9 +6,6 @@ STAGING_FOLDER="/tmp/kubelet-install"
 KUBERNETES_PKI_FOLDER="/etc/kubernetes/pki"
 KUBELET_CONFIG_FOLDER="/var/lib/kubelet"
 
-ca_key="";
-ca_crt="";
-
 exec 3>&1
 
 function say(){
@@ -55,10 +52,9 @@ function download_k8s_binaries()
 {
 	say "Downloading k8s binaries"
 	wget -q --show-progress --https-only --timestamping \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubelet" \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl"
-	chmod +x kubectl kubelet
-	sudo mv kubectl kubelet /usr/local/bin
+		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubelet" 
+	chmod +x kubelet
+	sudo mv kubelet /usr/local/bin
 	say "k8s binaries copied to bin folder"
 }
 

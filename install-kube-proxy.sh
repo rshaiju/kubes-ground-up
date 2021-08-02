@@ -52,10 +52,9 @@ function download_k8s_binaries()
 {
 	say "Downloading k8s binaries"
 	wget -q --show-progress --https-only --timestamping \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kube-proxy" \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl"
-	chmod +x kubectl kube-proxy
-	sudo mv kubectl kube-proxy /usr/local/bin
+		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kube-proxy" 
+	chmod +x kube-proxy
+	sudo mv kube-proxy /usr/local/bin
 	say "k8s binaries copied to bin folder"
 }
 

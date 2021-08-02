@@ -45,6 +45,12 @@ function validate_args(){
 	then
 		say_err "CA certificate file $ca_crt does not exist"
 		exit 1
+	fi
+
+	if [ -z $api_server ]
+	then
+		say_err "--api-server must be provided"
+		exit 1
 	fi	
 }	
 
@@ -52,10 +58,9 @@ function download_k8s_binaries()
 {
 	say "Downloading k8s binaries"
 	wget -q --show-progress --https-only --timestamping \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kube-scheduler" \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl"
-	chmod +x kubectl kube-scheduler
-	sudo mv kubectl kube-scheduler /usr/local/bin
+		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kube-scheduler" 
+	chmod +x kube-scheduler
+	sudo mv  kube-scheduler /usr/local/bin
 	say "k8s binaries copied to bin folder"
 }
 
@@ -71,7 +76,7 @@ function create_auth_files(){
 
 	say "Certificate created.. now creating kubeconfig"
 
-	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://10.0.0.4:6443 --kubeconfig kubeconfig
+	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig kubeconfig
 	kubectl config set-credentials kube-scheduler --embed-certs=true --client-certificate kube-scheduler.crt --client-key kube-scheduler.key --kubeconfig kubeconfig
 	kubectl config set-context shaijus-cluster-kube-scheduler --user=kube-scheduler --cluster=shaijus-cluster --kubeconfig kubeconfig
 	kubectl config use-context shaijus-cluster-kube-scheduler --kubeconfig kubeconfig
@@ -130,6 +135,10 @@ case "$1" in
 			;;
 		--ca-crt=*)
 		        ca_crt="${1#*=}"	
+			shift 1;
+			;;
+		--api-server=*)
+			api_server="${1#*=}"
 			shift 1;
 			;;
 		--help)

@@ -51,10 +51,9 @@ function download_k8s_binaries()
 {
 	say "Downloading k8s binaries"
 	wget -q --show-progress --https-only --timestamping \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kube-apiserver" \
-		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl"
-	chmod +x kubectl kube-apiserver
-	sudo mv kubectl kube-apiserver /usr/local/bin
+		"https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kube-apiserver"
+	chmod +x kube-apiserver
+	sudo mv kube-apiserver /usr/local/bin
 	say "k8s binaries copied to bin folder"
 }
 
@@ -102,7 +101,7 @@ function create_auth_files(){
 	sudo mkdir $KUBERNETES_PKI_FOLDER/kube-apiserver -p
 
 	sudo cp kube-apiserver.key kube-apiserver.crt kubelet-client.key kubelet-client.crt front-proxy-client.key front-proxy-client.crt $KUBERNETES_PKI_FOLDER/kube-apiserver
-	sudo cp $ca_key $ca_crt sa.key sa.pub $KUBERNETES_PKI_FOLDER 
+	sudo cp sa.key sa.pub $KUBERNETES_PKI_FOLDER 
 
 	say "Auth files copied to corresponding folders"
 

@@ -96,10 +96,8 @@ function create_auth_files(){
 	
 	say "Client certificate created.. now copying the certificates to pki folders"
 
-	sudo mkdir $K8s_PKI_FOLDER -p
  	sudo mkdir $ETCD_PKI_FOLDER -p
 
-	sudo cp $ca_crt $ca_key $K8s_PKI_FOLDER
 	sudo cp etcd.key etcd.crt etcd-client.key etcd-client.crt $ETCD_PKI_FOLDER
 
 	say "Auth files copied to corresponding folders"
