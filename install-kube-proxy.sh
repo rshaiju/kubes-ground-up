@@ -46,6 +46,12 @@ function validate_args(){
 		say_err "CA certificate file $ca_crt does not exist"
 		exit 1
 	fi	
+
+	if [ -z $api_server ]
+	then
+		say_err "--api-server must be provided"
+		exit 1
+	fi	
 }	
 
 function download_k8s_binaries()
@@ -70,7 +76,7 @@ function create_auth_files(){
 
 	say "Certificate created.. now creating kubeconfig"
 
-	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://10.0.0.4:6443 --kubeconfig kubeconfig
+	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig kubeconfig
 	kubectl config set-credentials kube-proxy --embed-certs=true --client-certificate kube-proxy.crt --client-key kube-proxy.key --kubeconfig kubeconfig
 	kubectl config set-context shaijus-cluster-kube-proxy --user=kube-proxy --cluster=shaijus-cluster --kubeconfig kubeconfig
 	kubectl config use-context shaijus-cluster-kube-proxy --kubeconfig kubeconfig
@@ -137,6 +143,10 @@ case "$1" in
 			;;
 		--ca-crt=*)
 		        ca_crt="${1#*=}"	
+			shift 1;
+			;;
+		--api-server=*)
+			api_server="${1#*=}"
 			shift 1;
 			;;
 		--help)
