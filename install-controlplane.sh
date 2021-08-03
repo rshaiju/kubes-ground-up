@@ -39,7 +39,7 @@ say "Installing etcd"
 bash install-etcd.sh --ca-key=$STAGING_FOLDER/ca.key --ca-crt=$STAGING_FOLDER/ca.crt
 say "Installed etcd"
 
-say "Installing kube-apiserver"
+: 'say "Installing kube-apiserver"
 bash install-kube-apiserver.sh --ca-key=$STAGING_FOLDER/ca.key --ca-crt=$STAGING_FOLDER/ca.crt
 say "Installed- kube-apiserver"
 
@@ -57,7 +57,7 @@ say "Installed kube-scheduler"
 
 say "Removing staging folder"
 sudo rm -r $STAGING_FOLDER
-
+'
 say "Installed all control plane components"
 
 
