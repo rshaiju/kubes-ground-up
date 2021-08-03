@@ -4,6 +4,8 @@ HOST_NAME=$(hostname)
 STAGING_FOLDER="/tmp/install-kube-worker"
 KUBERNETES_PKI_FOLDER="/etc/kubernetes/pki"
 
+install_network_addon=false
+
 exec 3>&1
 
 function say(){
@@ -68,10 +70,16 @@ case "$1" in
 			api_server="${1#*=}"
 			shift 1;
 			;;
+		--install-network-addon)
+			install_network_addon=true
+			shift 1;
+			;;
 		--help)
 			say "Installs Kubernetes Worker Components"
 			say "Usage:"
-			say "\t $scipt_name --ca-key <PATH TO CA KEY FILE> --ca-crt <PATH TO CA CRT FILE>"
+			say "\t $scipt_name --ca-key <PATH TO CA KEY FILE> --ca-crt <PATH TO CA CRT FILE> [Options]" 
+			say "Options:"
+			say "\t--install-network-addon\tInstalls Weavenet network addon"
 			exit 0
 			;;
 		*)
@@ -110,6 +118,23 @@ say "Installed kubelet"
 say "Installing kube-proxy"
 bash install-kube-proxy.sh --ca-key=$STAGING_FOLDER/ca.key --ca-crt=$STAGING_FOLDER/ca.crt --api-server=$api_server
 say "Installed kube-proxy"
+
+pushd $STAGING_FOLDER
+
+say "Installing CNI plug-ins"
+sudo mkdir -p /opt/cni/bin
+sudo wget https://github.com/containernetworking/plugins/releases/download/v0.8.3/cni-plugins-linux-amd64-v0.8.3.tgz
+sudo tar -xvf cni-plugins-linux-amd64-v0.8.3.tgz -C /opt/cni/bin/
+say "Installed CNI plug-ins"
+
+if [  $install_network_addon = true ]
+then	
+say "Installing network add-on"
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+say "Installed network add-on"
+fi
+
+popd
 
 say "Removing staging folder"
 sudo rm -r $STAGING_FOLDER
