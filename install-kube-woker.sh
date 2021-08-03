@@ -86,10 +86,10 @@ validate_args
 sudo rm -r $STAGING_FOLDER 2>/dev/null
 
 say "Creatng staging folder"
-mkdir $STAGING_FOLDER
+sudo mkdir $STAGING_FOLDER
 
 say "Creating Kubernetes pki folder"
-mkdir $KUBERNETES_PKI_FOLDER -p
+sudo mkdir $KUBERNETES_PKI_FOLDER -p
 
 sudo cp $ca_key $ca_crt $KUBERNETES_PKI_FOLDER
 
