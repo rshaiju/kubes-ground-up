@@ -69,17 +69,17 @@ function create_auth_files(){
 
 	say "Creating certificates"
 
-	openssl genrsa -out kube-scheduler.key 2048
-	openssl req -new -key kube-scheduler.key -subj="/CN=system:kube-scheduler" -out kube-scheduler.csr
-	openssl x509 -req -in kube-scheduler.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out kube-scheduler.crt -days 1000 
-	openssl x509 -in kube-scheduler.crt -noout -text
+	sudo openssl genrsa -out kube-scheduler.key 2048
+	sudo openssl req -new -key kube-scheduler.key -subj="/CN=system:kube-scheduler" -out kube-scheduler.csr
+	sudo openssl x509 -req -in kube-scheduler.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out kube-scheduler.crt -days 1000 
+	sudo openssl x509 -in kube-scheduler.crt -noout -text
 
 	say "Certificate created.. now creating kubeconfig"
 
-	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig kubeconfig
-	kubectl config set-credentials kube-scheduler --embed-certs=true --client-certificate kube-scheduler.crt --client-key kube-scheduler.key --kubeconfig kubeconfig
-	kubectl config set-context shaijus-cluster-kube-scheduler --user=kube-scheduler --cluster=shaijus-cluster --kubeconfig kubeconfig
-	kubectl config use-context shaijus-cluster-kube-scheduler --kubeconfig kubeconfig
+	sudo kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig kubeconfig
+	sudo kubectl config set-credentials kube-scheduler --embed-certs=true --client-certificate kube-scheduler.crt --client-key kube-scheduler.key --kubeconfig kubeconfig
+	sudo kubectl config set-context shaijus-cluster-kube-scheduler --user=kube-scheduler --cluster=shaijus-cluster --kubeconfig kubeconfig
+	sudo kubectl config use-context shaijus-cluster-kube-scheduler --kubeconfig kubeconfig
 	
 	say "kubeconfig created.. now creating kube-scheduler config"
 
@@ -158,7 +158,7 @@ validate_args
 
 download_k8s_binaries
 
-sudo rm -r $STAGING_FOLDER
+sudo rm -r $STAGING_FOLDER 2>/dev/null
 mkdir $STAGING_FOLDER -p
 
 say "Creating auth files."

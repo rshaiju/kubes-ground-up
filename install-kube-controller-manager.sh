@@ -69,17 +69,17 @@ function create_auth_files(){
 
 	say "Creating certificates"
 
-	openssl genrsa -out kube-controller-manager.key 2048
-	openssl req -new -key kube-controller-manager.key -subj="/CN=system:kube-controller-manager" -out kube-controller-manager.csr
-	openssl x509 -req -in kube-controller-manager.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out kube-controller-manager.crt -days 1000 
-	openssl x509 -in kube-controller-manager.crt -noout -text
+	sudo openssl genrsa -out kube-controller-manager.key 2048
+	sudo openssl req -new -key kube-controller-manager.key -subj="/CN=system:kube-controller-manager" -out kube-controller-manager.csr
+	sudo openssl x509 -req -in kube-controller-manager.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out kube-controller-manager.crt -days 1000 
+	sudo openssl x509 -in kube-controller-manager.crt -noout -text
 
 	say "Certificate created.. now creating kubeconfig"
 
-	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig kubeconfig
-	kubectl config set-credentials kube-controller-manager --embed-certs=true --client-certificate kube-controller-manager.crt --client-key kube-controller-manager.key --kubeconfig kubeconfig
-	kubectl config set-context shaijus-cluster-kube-controller-manager --user=kube-controller-manager --cluster=shaijus-cluster --kubeconfig kubeconfig
-	kubectl config use-context shaijus-cluster-kube-controller-manager --kubeconfig kubeconfig
+	sudo kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig kubeconfig
+	sudo kubectl config set-credentials kube-controller-manager --embed-certs=true --client-certificate kube-controller-manager.crt --client-key kube-controller-manager.key --kubeconfig kubeconfig
+	sudo kubectl config set-context shaijus-cluster-kube-controller-manager --user=kube-controller-manager --cluster=shaijus-cluster --kubeconfig kubeconfig
+	sudo kubectl config use-context shaijus-cluster-kube-controller-manager --kubeconfig kubeconfig
 	
 	say "kubeconfig created.. now copying the files"
 
@@ -167,7 +167,7 @@ validate_args
 
 download_k8s_binaries
 
-sudo rm -r $STAGING_FOLDER
+sudo rm -r $STAGING_FOLDER 2>/dev/null
 mkdir $STAGING_FOLDER -p
 
 say "Creating auth files."

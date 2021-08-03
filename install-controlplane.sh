@@ -20,8 +20,13 @@ function say_err(){
 	printf "%b\n" "${RED:-}Error:$1${NC:-}" >&2
 }
 
+rm -r $STAGING_FOLDER 2>/dev/null
+
+say "Created staging folder"
+mkdir $STAGING_FOLDER
+
 say "Installing kubectl.."
-bash install-kubectl
+bash install-kubectl.sh
 say "Installed kubectl"
 
 say "Creating root certificate"

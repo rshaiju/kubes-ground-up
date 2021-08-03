@@ -57,17 +57,17 @@ function create_kubeconfig(){
 
 	say "Creating certificates"
 
-	openssl genrsa -out admin.key 2048
-	openssl req -new -key admin.key -subj="/CN=admin/O=system:masters" -out admin.csr
-	openssl x509 -req -in admin.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out admin.crt -days 1000 
-	openssl x509 -in admin.crt -noout -text
+	sudo openssl genrsa -out admin.key 2048
+	sudo openssl req -new -key admin.key -subj="/CN=admin/O=system:masters" -out admin.csr
+	sudo openssl x509 -req -in admin.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out admin.crt -days 1000 
+	sudo openssl x509 -in admin.crt -noout -text
 
 	say "Certificate created.. now creating kubeconfig"
 
-	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig config
-	kubectl config set-credentials admin --embed-certs=true --client-certificate admin.crt --client-key admin.key --kubeconfig config
-	kubectl config set-context shaijus-cluster-admin --user=admin --cluster=shaijus-cluster --kubeconfig config
-	kubectl config use-context shaijus-cluster-admin --kubeconfig config
+	sudo kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig config
+	sudo kubectl config set-credentials admin --embed-certs=true --client-certificate admin.crt --client-key admin.key --kubeconfig config
+	sudo kubectl config set-context shaijus-cluster-admin --user=admin --cluster=shaijus-cluster --kubeconfig config
+	sudo kubectl config use-context shaijus-cluster-admin --kubeconfig config
 
 	mkdir ~/.kube -p
 
@@ -111,7 +111,7 @@ done
 
 validate_args
 
-sudo rm -r $STAGING_FOLDER
+sudo rm -r $STAGING_FOLDER 2>/dev/null
 mkdir $STAGING_FOLDER -p
 
 say "Creating kube config."

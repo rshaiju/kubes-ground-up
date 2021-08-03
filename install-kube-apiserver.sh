@@ -189,10 +189,10 @@ done
 
 validate_args
 
-sudo rm -r $STAGING_FOLDER
+sudo rm -r $STAGING_FOLDER 2>/dev/null
 mkdir $STAGING_FOLDER -p
 
-download_kube-apiserver_binaries
+download_k8s_binaries
 
 say "Creating auth files."
 

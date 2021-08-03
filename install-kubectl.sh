@@ -1,4 +1,5 @@
 #!/bin/bash
+K8S_VERSION="v1.21.3"
 exec 3>&1
 
 function say(){

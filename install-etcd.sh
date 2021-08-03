@@ -82,10 +82,10 @@ function create_auth_files(){
 	IP.2=127.0.0.1
 	EOF
 
-	openssl genrsa -out etcd.key 2048
-	openssl req -new -key etcd.key -subj="/CN=ETCD" -out etcd.csr -config openssl.cnf
-	openssl x509 -req -in etcd.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out etcd.crt -days 1000 -extensions=v3_req -extfile=openssl.cnf
-	openssl x509 -in etcd.crt -noout -text
+	sudo openssl genrsa -out etcd.key 2048
+	sudo openssl req -new -key etcd.key -subj="/CN=ETCD" -out etcd.csr -config openssl.cnf
+	sudo openssl x509 -req -in etcd.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out etcd.crt -days 1000 -extensions=v3_req -extfile=openssl.cnf
+	sudo openssl x509 -in etcd.crt -noout -text
 
 	say "Server certificate created.. now creating the client one"
 
@@ -175,8 +175,14 @@ done
 
 validate_args
 
-sudo rm -r $STAGING_FOLDER
+sudo rm -r $STAGING_FOLDER 2>/dev/null
 mkdir $STAGING_FOLDER -p
+
+say "Deleting existing etcd data folder(if any)"
+
+sudo rm -r /var/lib/etcd 2>/dev/null
+
+say "Downloading binaries"
 
 download_etcd_binaries
 
