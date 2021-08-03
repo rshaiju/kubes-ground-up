@@ -20,7 +20,7 @@ function say_err(){
 	printf "%b\n" "${RED:-}Error:$1${NC:-}" >&2
 }
 
-rm -r $STAGING_FOLDER 2>/dev/null
+sudo rm -r $STAGING_FOLDER 2>/dev/null
 
 say "Created staging folder"
 mkdir $STAGING_FOLDER
@@ -39,7 +39,7 @@ say "Installing etcd"
 bash install-etcd.sh --ca-key=$STAGING_FOLDER/ca.key --ca-crt=$STAGING_FOLDER/ca.crt
 say "Installed etcd"
 
-: 'say "Installing kube-apiserver"
+say "Installing kube-apiserver"
 bash install-kube-apiserver.sh --ca-key=$STAGING_FOLDER/ca.key --ca-crt=$STAGING_FOLDER/ca.crt
 say "Installed- kube-apiserver"
 
@@ -57,7 +57,7 @@ say "Installed kube-scheduler"
 
 say "Removing staging folder"
 sudo rm -r $STAGING_FOLDER
-'
+
 say "Installed all control plane components"
 
 

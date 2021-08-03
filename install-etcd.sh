@@ -119,9 +119,9 @@ function create_service_unit(){
 	--advertise-client-urls=https://${HOST_IP}:2379 \
 	--cert-file=$ETCD_PKI_FOLDER/etcd.crt \
 	--client-cert-auth=true \
-	--data-dir=/var/lib/etcd
+	--data-dir=/var/lib/etcd \
 	--initial-advertise-peer-urls=https://${HOST_IP}:2380 \
-	--initial-cluster=controlplane=https://${HOST_IP}:2380 \
+	--initial-cluster=${HOST_NAME}=https://${HOST_IP}:2380 \
 	--key-file=$ETCD_PKI_FOLDER/etcd.key \
 	--listen-client-urls=https://127.0.0.1:2379,https://${HOST_IP}:2379 \
 	--listen-metrics-urls=http://127.0.0.1:2381 \
