@@ -70,14 +70,14 @@ function create_auth_files(){
 	say "Creating certificates"
 
 	openssl genrsa -out kube-proxy.key 2048
-	openssl req -new -key kube-proxy.key -subj="/CN=system:kube-proxy" -out kube-proxy.csr
-	openssl x509 -req -in kube-proxy.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out kube-proxy.crt -days 1000 
+	sudo openssl req -new -key kube-proxy.key -subj="/CN=system:kube-proxy" -out kube-proxy.csr
+	sudo openssl x509 -req -in kube-proxy.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out kube-proxy.crt -days 1000 
 	openssl x509 -in kube-proxy.crt -noout -text
 
 	say "Certificate created.. now creating kubeconfig"
 
 	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig kubeconfig
-	kubectl config set-credentials kube-proxy --embed-certs=true --client-certificate kube-proxy.crt --client-key kube-proxy.key --kubeconfig kubeconfig
+	sudo kubectl config set-credentials kube-proxy --embed-certs=true --client-certificate kube-proxy.crt --client-key kube-proxy.key --kubeconfig kubeconfig
 	kubectl config set-context shaijus-cluster-kube-proxy --user=kube-proxy --cluster=shaijus-cluster --kubeconfig kubeconfig
 	kubectl config use-context shaijus-cluster-kube-proxy --kubeconfig kubeconfig
 	

@@ -84,14 +84,14 @@ function create_auth_files(){
 	EOF
 
 	openssl genrsa -out ${HOST_NAME}.key 2048
-	openssl req -new -key ${HOST_NAME}.key -subj="/CN=system:node:${HOST_NAME}/O=system:nodes" -out ${HOST_NAME}.csr -config openssl-${HOST_NAME}.cnf
-	openssl x509 -req -in ${HOST_NAME}.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out ${HOST_NAME}.crt -days 1000 -extensions v3_req -extfile openssl-${HOST_NAME}.cnf
+	sudo openssl req -new -key ${HOST_NAME}.key -subj="/CN=system:node:${HOST_NAME}/O=system:nodes" -out ${HOST_NAME}.csr -config openssl-${HOST_NAME}.cnf
+	sudo openssl x509 -req -in ${HOST_NAME}.csr -CA $ca_crt -CAkey $ca_key -CAcreateserial -out ${HOST_NAME}.crt -days 1000 -extensions v3_req -extfile openssl-${HOST_NAME}.cnf
 	openssl x509 -in ${HOST_NAME}.crt -noout -text
 
 	say "Certificates created.. now creating kubeconfig"
 
 	kubectl config set-cluster shaijus-cluster --embed-certs --certificate-authority $ca_crt --server=https://$api_server:6443 --kubeconfig kubeconfig
-	kubectl config set-credentials ${HOST_NAME} --embed-certs=true --client-certificate ${HOST_NAME}.crt --client-key ${HOST_NAME}.key --kubeconfig kubeconfig
+	sudo kubectl config set-credentials ${HOST_NAME} --embed-certs=true --client-certificate ${HOST_NAME}.crt --client-key ${HOST_NAME}.key --kubeconfig kubeconfig
 	kubectl config set-context shaijus-cluster-${HOST_NAME} --user=${HOST_NAME} --cluster=shaijus-cluster --kubeconfig kubeconfig
 	kubectl config use-context shaijus-cluster-${HOST_NAME} --kubeconfig kubeconfig
 	
