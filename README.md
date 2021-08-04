@@ -1,6 +1,6 @@
 # kubes-ground-up
 
-This project helps set up a signle master k8s environment in freshly installed ubuntu machines. The only preqrequisite is that the machines should be able to reach each other.
+This project helps set up a single master k8s environment in freshly installed ubuntu machines. The only preqrequisite is that the machines should be able to reach each other.
 
 Following are the steps to perform
 
